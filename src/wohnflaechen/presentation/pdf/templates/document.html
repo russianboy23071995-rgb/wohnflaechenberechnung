@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8"/>
+    <title>{{ document_title_full }} – {{ object_name }}</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- Deckblatt -->
+<section class="page cover-page">
+    {% set page_number = 1 %}
+    {% include 'header.html' %}
+
+    <div class="page-body">
+        <div class="document-title-block cover-title">
+            <div class="document-title-bold document-title-line">{{ document_title_line_1 }}</div>
+            <div class="document-title-bold document-title-line">{{ document_title_line_2 }}</div>
+            <div class="document-title-bold document-title-line">{{ document_subtitle }}</div>
+        </div>
+
+        <div class="cover-object">
+            <h2>Zum Objekt:</h2>
+            <table class="cover-fields">
+                <tr>
+                    <td class="cover-label">Bezeichnung:</td>
+                    <td class="cover-value">{{ object_name }}</td>
+                </tr>
+                <tr>
+                    <td class="cover-label">Adresse:</td>
+                    <td class="cover-value">{{ address }}</td>
+                </tr>
+            </table>
+        </div>
+
+        {% if object_description_html %}
+        <div class="text-section">
+            <h3>Objektbeschreibung</h3>
+            {{ object_description_html }}
+        </div>
+        {% endif %}
+
+        <div class="preface-block">
+            <h2 class="preface-main-title">{{ preface_title }}</h2>
+            {% if preface_html %}
+            {{ preface_html }}
+            {% endif %}
+        </div>
+
+        {% if methodology_html %}
+        <div class="text-section">
+            <h3>Aufmaßmethodik</h3>
+            {{ methodology_html }}
+        </div>
+        {% endif %}
+
+        {% if special_notes_html %}
+        <div class="text-section">
+            <h3>Besondere Hinweise</h3>
+            {{ special_notes_html }}
+        </div>
+        {% endif %}
+
+        {% if liability_html %}
+        <div class="text-section">
+            <h3>Haftungshinweise</h3>
+            {{ liability_html }}
+        </div>
+        {% endif %}
+    </div>
+
+    {% include 'footer.html' %}
+</section>
+
+<!-- Geschoss-Seiten -->
+{% for floor in floors %}
+<section class="page floor-page">
+    {% set page_number = floor.page_number %}
+    {% include 'header.html' %}
+
+    <div class="page-body">
+        <h2 class="floor-heading">{{ floor.section_index }}.&nbsp;&nbsp;{{ floor.name }}</h2>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-room">RAUM</th>
+                    <th class="col-name">BEZEICHNUNG</th>
+                    <th class="col-calc">BERECHNUNG</th>
+                    <th class="col-factor">ANRECHNUNGSFAKTOR</th>
+                    <th class="col-usable">NUTZFLÄCHE</th>
+                    <th class="col-living">WOHNFLÄCHE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in floor.rooms %}
+                <tr>
+                    <td class="col-room">{{ room.index }}</td>
+                    <td class="col-name">{{ room.name_html }}</td>
+                    <td class="col-calc">{{ room.calculation_html }}</td>
+                    <td class="col-factor">{{ room.factor }}</td>
+                    <td class="col-usable">{{ room.usable_area }}</td>
+                    <td class="col-living">{{ room.living_area }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="summary-row summary-row-bold">
+                    <td colspan="4" class="summary-label">{{ floor.name }} - Summe Wohnfläche:</td>
+                    <td class="col-usable"></td>
+                    <td class="col-living">{{ floor.sum_living }}</td>
+                </tr>
+                <tr class="summary-row summary-row-bold">
+                    <td colspan="4" class="summary-label">{{ floor.name }} - Summe Nutzfläche:</td>
+                    <td class="col-usable">{{ floor.sum_usable }}</td>
+                    <td class="col-living"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'footer.html' %}
+</section>
+{% endfor %}
+
+<!-- Zusammenfassung -->
+<section class="page summary-page">
+    {% set page_number = summary_page_number %}
+    {% include 'header.html' %}
+
+    <div class="page-body">
+        <h2 class="summary-heading">Zusammenfassung</h2>
+
+        <table class="data-table summary-table">
+            <thead>
+                <tr>
+                    <th class="summary-col-label">BEZEICHNUNG</th>
+                    <th class="summary-col-usable">NUTZFLÄCHE</th>
+                    <th class="summary-col-living">WOHNFLÄCHE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="summary-row summary-row-bold summary-living-block">
+                    <td class="summary-label">Gesamtsumme Wohnfläche:</td>
+                    <td class="summary-col-usable summary-cell-muted"></td>
+                    <td class="summary-col-living">{{ total_living }}</td>
+                </tr>
+                <tr class="summary-row summary-living-block">
+                    <td class="summary-subheading" colspan="3">bestehend aus:</td>
+                </tr>
+                {% for item in floor_totals %}
+                <tr class="summary-row summary-living-block">
+                    <td class="summary-label summary-indent">{{ item.name }}:</td>
+                    <td class="summary-col-usable summary-cell-muted"></td>
+                    <td class="summary-col-living">{{ item.living_area }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="summary-row summary-row-bold summary-usable-block">
+                    <td class="summary-label">Gesamtsumme Nutzfläche:</td>
+                    <td class="summary-col-usable">{{ total_usable }}</td>
+                    <td class="summary-col-living summary-cell-muted"></td>
+                </tr>
+                <tr class="summary-row summary-usable-block">
+                    <td class="summary-subheading" colspan="3">bestehend aus:</td>
+                </tr>
+                {% for item in floor_totals %}
+                <tr class="summary-row summary-usable-block">
+                    <td class="summary-label summary-indent">{{ item.name }}:</td>
+                    <td class="summary-col-usable">{{ item.usable_area }}</td>
+                    <td class="summary-col-living summary-cell-muted"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="document-footer">
+            <p>Berechnung und Aufmaß aufgestellt durch</p>
+            <img src="{{ stamp_signature }}" class="stamp-image" alt="NOVIKOV PLAN &amp; MAß"/>
+            <p class="footer-date">{{ footer_location }}, {{ footer_date }}</p>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</section>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+/* NOVIKOV | PLAN & Maß – WoFlV PDF (A4) */
+
+@page {
+    size: A4;
+    margin: 1.6cm 1.4cm 0.75cm 1.4cm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.35;
+    color: #1a1a1a;
+}
+
+.page {
+    page-break-after: always;
+}
+
+.page:last-child {
+    page-break-after: auto;
+}
+
+.page-body {
+    padding-bottom: 1.45cm;
+}
+
+/* Kopfbereich */
+.page-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 0.45cm;
+    border-bottom: 1px solid #c8c8c8;
+    padding-bottom: 0.2cm;
+}
+
+.page-header-left {
+    display: table-cell;
+    vertical-align: middle;
+    width: 75%;
+}
+
+.page-header-right {
+    display: table-cell;
+    vertical-align: top;
+    text-align: right;
+    width: 25%;
+}
+
+.header-logo-icon {
+    height: 1.05cm;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.25cm;
+}
+
+.header-brand-text {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.company-name {
+    font-size: 11pt;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-bottom: 1px;
+}
+
+.company-tagline {
+    font-size: 8pt;
+    color: #444;
+}
+
+.page-number {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #666;
+}
+
+/* Fußzeile – fest am unteren A4-Rand */
+.page-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: table;
+    width: 100%;
+    font-size: 8pt;
+    color: #333;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 0.12cm;
+    height: 1.05cm;
+}
+
+.page-footer-left {
+    display: table-cell;
+    vertical-align: bottom;
+    width: 60%;
+    line-height: 1.35;
+}
+
+.page-footer-right {
+    display: table-cell;
+    vertical-align: bottom;
+    text-align: right;
+    width: 40%;
+}
+
+.footer-logo {
+    height: 0.85cm;
+    width: auto;
+}
+
+/* Dokumenttitel – drei Zeilen, fett */
+.document-title-block {
+    margin: 0.55cm 0 0.45cm 0;
+}
+
+.document-title-bold {
+    font-size: 15pt;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.document-title-line {
+    display: block;
+}
+
+/* Deckblatt Objekt – Label und Wert in Spalten */
+.cover-object {
+    margin: 0.35cm 0 0.55cm 0;
+}
+
+.cover-object h2 {
+    font-size: 10pt;
+    font-weight: 700;
+    margin: 0 0 0.25cm 0;
+}
+
+.cover-fields {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.15cm;
+}
+
+.cover-fields td {
+    border: none;
+    padding: 0.1cm 0;
+    vertical-align: top;
+    font-size: 9pt;
+}
+
+.cover-label {
+    width: 3.4cm;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cover-value {
+    padding-left: 1.4cm;
+    font-weight: 400;
+}
+
+/* Vorbemerkungen */
+.preface-block {
+    margin-top: 0.4cm;
+}
+
+.preface-main-title {
+    font-size: 10pt;
+    font-weight: 700;
+    margin: 0 0 0.35cm 0;
+}
+
+.preface-block p {
+    margin: 0 0 0.3cm 0;
+}
+
+.preface-block strong {
+    font-weight: 700;
+}
+
+.text-section {
+    margin-top: 0.35cm;
+}
+
+.text-section h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    margin: 0 0 0.2cm 0;
+}
+
+/* Geschoss */
+.floor-heading {
+    font-size: 11pt;
+    font-weight: 700;
+    margin: 0.1cm 0 0.35cm 0;
+}
+
+.summary-heading {
+    font-size: 12pt;
+    font-weight: 700;
+    margin: 0.15cm 0 0.4cm 0;
+}
+
+/* Tabellen */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 0.25cm;
+}
+
+.data-table th {
+    background-color: #ececec;
+    border: 1px solid #999;
+    padding: 4px 5px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 7.5pt;
+    vertical-align: bottom;
+}
+
+.data-table td {
+    border: 1px solid #999;
+    padding: 4px 5px;
+    vertical-align: top;
+}
+
+.col-room {
+    width: 5%;
+    text-align: center;
+}
+
+.col-name {
+    width: 13%;
+}
+
+.col-calc {
+    width: 40%;
+    line-height: 1.25;
+}
+
+.col-factor {
+    width: 11%;
+    text-align: center;
+}
+
+.col-usable,
+.col-living {
+    width: 14%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.summary-row td {
+    border: 1px solid #999;
+    font-size: 9pt;
+}
+
+.summary-row-bold td {
+    font-weight: 700;
+}
+
+.summary-row .summary-label {
+    text-align: left;
+}
+
+.summary-subheading {
+    font-size: 9pt;
+    padding-top: 0.1cm;
+    border-left: 1px solid #999;
+    border-right: 1px solid #999;
+    border-bottom: none;
+    border-top: none;
+}
+
+.summary-indent {
+    padding-left: 0.5cm;
+}
+
+/* Zusammenfassung – nur Bezeichnung, Nutz- und Wohnfläche */
+.summary-table .summary-col-label {
+    width: 58%;
+    text-align: left;
+}
+
+.summary-table .summary-col-usable,
+.summary-table .summary-col-living {
+    width: 21%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.summary-table th.summary-col-usable,
+.summary-table th.summary-col-living {
+    text-align: right;
+}
+
+.summary-table .summary-subheading {
+    font-size: 9pt;
+    padding-top: 0.1cm;
+    border: 1px solid #999;
+    border-bottom: none;
+}
+
+/* Zusammenfassung – irrelevante Spalten ausgrauen */
+.summary-cell-muted {
+    background-color: #d8d8d8 !important;
+    color: transparent !important;
+    border-color: #bbb !important;
+}
+
+.summary-living-block .col-usable.summary-cell-muted,
+.summary-usable-block .col-living.summary-cell-muted {
+    background-color: #d8d8d8 !important;
+}
+
+/* Abschluss Zusammenfassung */
+.document-footer {
+    margin-top: 0.8cm;
+    font-size: 9pt;
+}
+
+.document-footer p {
+    margin: 0.15cm 0;
+}
+
+.stamp-image {
+    height: 2.08cm;
+    width: auto;
+    display: block;
+    margin: 0.25cm 0 0.15cm 0;
+}
+
+.footer-date {
+    margin-top: 0.2cm;
+}
