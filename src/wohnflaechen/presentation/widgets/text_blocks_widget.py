@@ -28,6 +28,7 @@ class TextBlocksWidget(QWidget):
             "Aufmaß-Auswahl in den Projektdaten an. Weitere Texte erscheinen in der PDF."
         )
         info.setWordWrap(True)
+        info.setObjectName("hintText")
         layout.addWidget(info)
 
         self.tabs = QTabWidget()

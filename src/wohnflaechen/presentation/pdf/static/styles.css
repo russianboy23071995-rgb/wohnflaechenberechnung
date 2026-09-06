@@ -2,7 +2,25 @@
 
 @page {
     size: A4;
-    margin: 1.6cm 1.4cm 0.75cm 1.4cm;
+    margin: 1.6cm 1.4cm 1.55cm 1.4cm;
+
+    @bottom-left {
+        content: element(footer-left);
+        vertical-align: top;
+        width: 42%;
+    }
+
+    @bottom-center {
+        content: element(footer-page);
+        vertical-align: top;
+    }
+
+    @bottom-right {
+        content: element(footer-right);
+        vertical-align: top;
+        width: 42%;
+        text-align: right;
+    }
 }
 
 * {
@@ -25,7 +43,7 @@ body {
 }
 
 .page-body {
-    padding-bottom: 1.45cm;
+    padding-bottom: 0.25cm;
 }
 
 /* Kopfbereich */
@@ -40,14 +58,7 @@ body {
 .page-header-left {
     display: table-cell;
     vertical-align: middle;
-    width: 75%;
-}
-
-.page-header-right {
-    display: table-cell;
-    vertical-align: top;
-    text-align: right;
-    width: 25%;
+    width: 100%;
 }
 
 .header-logo-icon {
@@ -75,39 +86,38 @@ body {
     color: #444;
 }
 
-.page-number {
-    font-size: 13pt;
-    font-weight: 400;
-    color: #666;
-}
-
-/* Fußzeile – fest am unteren A4-Rand */
-.page-footer {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: table;
-    width: 100%;
+/* Fußzeile – Running-Elemente in @page-Margins (WeasyPrint) */
+.footer-run {
     font-size: 8pt;
     color: #333;
     border-top: 1px solid #e0e0e0;
     padding-top: 0.12cm;
-    height: 1.05cm;
+    min-height: 1.05cm;
+    box-sizing: border-box;
 }
 
-.page-footer-left {
-    display: table-cell;
-    vertical-align: bottom;
-    width: 60%;
+.footer-run-left {
+    position: running(footer-left);
     line-height: 1.35;
+    width: 100%;
 }
 
-.page-footer-right {
-    display: table-cell;
-    vertical-align: bottom;
+.footer-run-right {
+    position: running(footer-right);
+    width: 100%;
     text-align: right;
-    width: 40%;
+}
+
+.footer-run-page {
+    position: running(footer-page);
+    width: 100%;
+    text-align: center;
+}
+
+.footer-run-page .page-number {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #666;
 }
 
 .footer-logo {
@@ -243,6 +253,29 @@ body {
 .col-calc {
     width: 40%;
     line-height: 1.25;
+}
+
+.col-calc .calc-line {
+    display: block;
+    line-height: 1.2;
+}
+
+.col-calc .calc-prefix {
+    display: inline-block;
+    width: 1.4em;
+    text-align: left;
+    vertical-align: top;
+}
+
+.col-calc .calc-content {
+    display: inline;
+}
+
+.col-calc .calc-section {
+    display: block;
+    font-weight: 600;
+    margin-top: 0.2cm;
+    line-height: 1.2;
 }
 
 .col-factor {

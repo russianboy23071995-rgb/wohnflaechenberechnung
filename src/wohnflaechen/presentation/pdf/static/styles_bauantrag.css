@@ -1,0 +1,193 @@
+/* Bauantrag-Layout – Times New Roman, angelehnt an WoFlV-Vorabzug */
+
+@page {
+    size: A4;
+    margin: 1.5cm 1.6cm 1.8cm 1.6cm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 11pt;
+    line-height: 1.25;
+    color: #000;
+}
+
+.page {
+    page-break-after: always;
+}
+
+.page:last-child {
+    page-break-after: auto;
+}
+
+.plankopf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.35cm;
+}
+
+.plankopf-table td {
+    vertical-align: top;
+    padding: 0.05cm 0;
+}
+
+.plankopf-label {
+    width: 2.2cm;
+    font-weight: bold;
+}
+
+.plankopf-value {
+    font-weight: bold;
+}
+
+.title-block {
+    text-align: center;
+    margin: 0.45cm 0 0.35cm;
+}
+
+.title-main {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 11pt;
+}
+
+.title-sub {
+    font-size: 11pt;
+    margin-top: 0.1cm;
+}
+
+.section-heading {
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 0.35cm 0 0.15cm;
+}
+
+.classic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.1cm;
+}
+
+.classic-table th {
+    text-align: left;
+    font-weight: bold;
+    padding: 0.05cm 0.08cm 0.12cm 0;
+    vertical-align: bottom;
+}
+
+.classic-table th.col-area {
+    text-align: right;
+    width: 2.4cm;
+}
+
+.classic-table td {
+    vertical-align: top;
+    padding: 0.08cm 0.08cm 0.08cm 0;
+}
+
+.classic-table .col-number {
+    width: 1.5cm;
+    white-space: nowrap;
+}
+
+.classic-table .col-name {
+    width: 3.2cm;
+}
+
+.classic-table .col-calc {
+    width: auto;
+}
+
+.classic-table .col-area {
+    text-align: right;
+    white-space: nowrap;
+    width: 2.4cm;
+}
+
+.calc-line {
+    display: block;
+    white-space: nowrap;
+}
+
+.calc-prefix {
+    display: inline-block;
+    width: 0.45cm;
+}
+
+.calc-section {
+    font-style: italic;
+}
+
+.floor-sum {
+    margin-top: 0.25cm;
+    text-align: right;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.summary-block {
+    margin-top: 0.45cm;
+}
+
+.summary-title {
+    font-weight: bold;
+    margin-bottom: 0.15cm;
+}
+
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.summary-table td {
+    padding: 0.05cm 0;
+}
+
+.summary-table .label {
+    width: 70%;
+}
+
+.summary-table .value {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.summary-total {
+    border-top: 1px solid #000;
+    border-bottom: 3px double #000;
+    font-weight: bold;
+}
+
+.summary-total td {
+    padding-top: 0.12cm;
+    padding-bottom: 0.12cm;
+}
+
+.section-number {
+    font-weight: bold;
+    margin-top: 0.5cm;
+}
+
+.signature-block {
+    margin-top: 1.2cm;
+    font-size: 12pt;
+}
+
+.signature-block .label {
+    font-style: italic;
+}
+
+.signature-block .name {
+    margin-top: 0.35cm;
+}
+
+.company-footer {
+    margin-top: 1.4cm;
+    font-size: 9pt;
+    border-top: 1px solid #000;
+    padding-top: 0.15cm;
+}

@@ -10,5 +10,6 @@ class Floor:
 
     id: Optional[int] = None
     project_id: int = 0
+    building_id: Optional[int] = None
     name: str = ""
     sort_order: int = 0

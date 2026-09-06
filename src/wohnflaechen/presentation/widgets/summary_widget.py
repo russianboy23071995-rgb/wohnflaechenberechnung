@@ -3,6 +3,7 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
+    QHBoxLayout,
     QHeaderView,
     QLabel,
     QPushButton,
@@ -23,6 +24,8 @@ class SummaryWidget(QWidget):
     """Zeigt Gesamtsummen und Geschoss-Aufschlüsselung zur Fehlerkontrolle."""
 
     export_pdf_requested = Signal()
+    open_export_folder_requested = Signal()
+    continue_to_invoice_requested = Signal()
 
     def __init__(
         self,
@@ -41,24 +44,25 @@ class SummaryWidget(QWidget):
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
         title = QLabel("Zusammenfassung")
-        title.setStyleSheet("font-weight: 700; font-size: 11pt;")
+        title.setObjectName("sectionTitle")
         layout.addWidget(title)
 
         hint = QLabel(
             "Kontrollübersicht vor dem PDF-Export. "
             "Anrechnungsfaktoren dienen nur der Deklaration."
         )
+        hint.setObjectName("hintText")
         hint.setWordWrap(True)
-        hint.setStyleSheet("color: #666; font-size: 9pt;")
         layout.addWidget(hint)
 
         self.total_living_label = QLabel("Gesamtwohnfläche: 0,00 m²")
         self.total_usable_label = QLabel("Gesamtnutzfläche: 0,00 m²")
-        self.total_living_label.setStyleSheet("font-weight: 700;")
-        self.total_usable_label.setStyleSheet("font-weight: 700;")
+        self.total_living_label.setObjectName("metricValue")
+        self.total_usable_label.setObjectName("metricValue")
         layout.addWidget(self.total_living_label)
         layout.addWidget(self.total_usable_label)
 
@@ -74,25 +78,54 @@ class SummaryWidget(QWidget):
         layout.addWidget(self.table, stretch=1)
 
         self.unassigned_label = QLabel("")
+        self.unassigned_label.setObjectName("warningText")
         self.unassigned_label.setWordWrap(True)
-        self.unassigned_label.setStyleSheet("color: #a44; font-size: 9pt;")
         layout.addWidget(self.unassigned_label)
 
         self.export_pdf_button = QPushButton("PDF exportieren")
-        self.export_pdf_button.setMinimumHeight(40)
-        self.export_pdf_button.setStyleSheet(
-            "font-weight: 600; font-size: 10pt; padding: 8px 12px;"
-        )
+        self.export_pdf_button.setObjectName("primaryButton")
+        self.export_pdf_button.setMinimumHeight(42)
+        self.export_pdf_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.export_pdf_button.clicked.connect(self.export_pdf_requested.emit)
-        layout.addWidget(self.export_pdf_button, alignment=Qt.AlignmentFlag.AlignRight)
+
+        self.open_folder_button = QPushButton("Exportordner öffnen")
+        self.open_folder_button.setMinimumHeight(42)
+        self.open_folder_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.open_folder_button.setVisible(False)
+        self.open_folder_button.clicked.connect(self.open_export_folder_requested.emit)
+
+        self.continue_invoice_button = QPushButton("Weiter zur Rechnungserstellung")
+        self.continue_invoice_button.setObjectName("secondaryButton")
+        self.continue_invoice_button.setMinimumHeight(42)
+        self.continue_invoice_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.continue_invoice_button.setVisible(False)
+        self.continue_invoice_button.clicked.connect(self.continue_to_invoice_requested.emit)
+
+        export_row = QHBoxLayout()
+        export_row.addStretch()
+        export_row.addWidget(self.continue_invoice_button)
+        export_row.addWidget(self.open_folder_button)
+        export_row.addWidget(self.export_pdf_button)
+        layout.addLayout(export_row)
+
+    def set_continue_to_invoice_available(self, available: bool) -> None:
+        self.continue_invoice_button.setVisible(available)
+
+    def set_export_folder_available(self, available: bool) -> None:
+        self.open_folder_button.setVisible(available)
+        self.open_folder_button.setEnabled(available)
 
     def set_export_enabled(self, enabled: bool) -> None:
         self.export_pdf_button.setEnabled(enabled)
+        if not enabled:
+            self.set_export_folder_available(False)
+            self.set_continue_to_invoice_available(False)
 
     def set_project(self, project_id: int | None) -> None:
         self._project_id = project_id
         self._live_rooms = None
         self.set_export_enabled(project_id is not None)
+        self.set_continue_to_invoice_available(False)
         self.refresh()
 
     def refresh(self, rooms: list[Room] | None = None) -> None:

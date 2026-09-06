@@ -29,7 +29,7 @@ class PrefaceWidget(QWidget):
             "Punkt 3 passt sich der Aufmaß-Auswahl in den Projektdaten an."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("color: #555; font-size: 9pt;")
+        info.setObjectName("hintText")
         layout.addWidget(info)
 
         self.editor = QTextEdit()

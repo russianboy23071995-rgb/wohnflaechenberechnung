@@ -54,7 +54,7 @@ class ProjectDialog(QDialog):
             "für Bestandsunterlagen verwendet."
         )
         self.measurement_hint.setWordWrap(True)
-        self.measurement_hint.setStyleSheet("color: #555; font-size: 9pt;")
+        self.measurement_hint.setObjectName("hintText")
 
         self.notes_edit = QTextEdit()
         self.notes_edit.setMaximumHeight(100)

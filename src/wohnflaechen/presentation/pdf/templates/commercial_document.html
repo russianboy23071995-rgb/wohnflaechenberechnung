@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8"/>
+    <title>{{ document_title }} {{ document_number }}</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <style>
+        .commercial-page { padding: 0.5cm 0; }
+        .commercial-title { font-size: 18pt; font-weight: 700; margin-bottom: 0.4cm; }
+        .commercial-meta { margin-bottom: 0.6cm; }
+        .commercial-meta p { margin: 0.12cm 0; }
+        .commercial-section { margin-top: 0.5cm; }
+        .commercial-section h3 { font-size: 10pt; margin: 0 0 0.2cm 0; }
+        .commercial-service {
+            border: 1px solid #ccc;
+            padding: 0.35cm;
+            min-height: 3cm;
+            white-space: pre-wrap;
+        }
+        .commercial-price {
+            font-size: 12pt;
+            font-weight: 700;
+            margin-top: 0.5cm;
+        }
+        .commercial-placeholder {
+            margin-top: 1cm;
+            font-size: 7.5pt;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<section class="commercial-page">
+    <div class="commercial-title">{{ document_title }}</div>
+    <div class="commercial-meta">
+        <p><strong>{{ document_number_label }}:</strong> {{ document_number }}</p>
+        <p><strong>Datum:</strong> {{ document_date }}</p>
+    </div>
+
+    <div class="commercial-section">
+        <h3>Auftraggeber</h3>
+        <p>{{ client_name }}</p>
+        {% if client_address %}<p>{{ client_address }}</p>{% endif %}
+        {% if client_email %}<p>{{ client_email }}</p>{% endif %}
+        {% if client_phone %}<p>{{ client_phone }}</p>{% endif %}
+    </div>
+
+    <div class="commercial-section">
+        <h3>Objekt</h3>
+        <p>{{ object_name }}</p>
+        {% if object_address %}<p>{{ object_address }}</p>{% endif %}
+    </div>
+
+    <div class="commercial-section">
+        <h3>Leistung</h3>
+        <div class="commercial-service">{{ service_description }}</div>
+    </div>
+
+    <div class="commercial-price">Angebotspreis / Rechnungsbetrag: {{ price_formatted }}</div>
+
+    {% if notes %}
+    <div class="commercial-section">
+        <h3>Bemerkungen</h3>
+        <p>{{ notes }}</p>
+    </div>
+    {% endif %}
+
+    <p class="commercial-placeholder">{{ placeholder_notice }}</p>
+</section>
+</body>
+</html>

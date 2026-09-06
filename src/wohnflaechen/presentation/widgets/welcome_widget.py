@@ -1,7 +1,5 @@
 """Startbildschirm mit Firmenbranding."""
 
-from pathlib import Path
-
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
@@ -14,75 +12,97 @@ from PySide6.QtWidgets import (
 from wohnflaechen.presentation.pdf.branding import (
     COMPANY_NAME,
     COMPANY_TAGLINE,
-    DOCUMENT_TITLE_LINE_1,
-    DOCUMENT_TITLE_LINE_2,
-    DOCUMENT_SUBTITLE,
 )
-
-_LOGO_PATH = Path(__file__).parent.parent / "pdf" / "static" / "logo_icon.png"
+from wohnflaechen.presentation.paths import pdf_static_file
 
 
 class WelcomeWidget(QWidget):
-    """Willkommensansicht vor Projektstart."""
+    """Willkommensansicht – Auftrag oder bestehende Berechnung."""
 
-    create_project = Signal()
-    open_project = Signal()
+    create_auftrag = Signal()
+    open_auftrag = Signal()
+    standalone_woflv = Signal()
+    open_standalone_project = Signal()
+    settings_requested = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self.setObjectName("appBackground")
         self._build_ui()
 
     def _build_ui(self) -> None:
-        layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setSpacing(18)
+        outer = QVBoxLayout(self)
+        outer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        outer.setContentsMargins(24, 24, 24, 24)
 
-        if _LOGO_PATH.is_file():
+        card = QWidget()
+        card.setObjectName("welcomeCard")
+        card.setMaximumWidth(580)
+        layout = QVBoxLayout(card)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(14)
+        layout.setContentsMargins(40, 36, 40, 36)
+
+        logo_path = pdf_static_file("logo_icon.png")
+        if logo_path.is_file():
             logo = QLabel()
-            pixmap = QPixmap(str(_LOGO_PATH))
-            scaled = pixmap.scaledToHeight(96, Qt.TransformationMode.SmoothTransformation)
+            pixmap = QPixmap(str(logo_path))
+            scaled = pixmap.scaledToHeight(88, Qt.TransformationMode.SmoothTransformation)
             logo.setPixmap(scaled)
             logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
             layout.addWidget(logo)
 
         company = QLabel(COMPANY_NAME)
+        company.setObjectName("brandTitle")
         company.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        company.setStyleSheet("font-size: 22px; font-weight: 600;")
         layout.addWidget(company)
 
         tagline = QLabel(COMPANY_TAGLINE)
+        tagline.setObjectName("brandSubtitle")
         tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        tagline.setStyleSheet("font-size: 11pt; color: #555;")
         layout.addWidget(tagline)
 
-        subtitle = QLabel(
-            f"{DOCUMENT_TITLE_LINE_1} · {DOCUMENT_TITLE_LINE_2} · {DOCUMENT_SUBTITLE}"
-        )
-        subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        subtitle.setStyleSheet("font-size: 13pt; margin-top: 8px;")
-        layout.addWidget(subtitle)
+        layout.addSpacing(12)
 
-        layout.addSpacing(24)
+        auftrag_btn = QPushButton("Neuer Auftrag (Angebot → WoFlV → Rechnung)")
+        auftrag_btn.setObjectName("primaryButton")
+        auftrag_btn.setMinimumWidth(320)
+        auftrag_btn.setMinimumHeight(44)
+        auftrag_btn.clicked.connect(self.create_auftrag.emit)
+        layout.addWidget(auftrag_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        create_btn = QPushButton("Wohnflächenberechnung erstellen")
-        create_btn.setMinimumWidth(280)
-        create_btn.setMinimumHeight(42)
-        create_btn.setStyleSheet(
-            "font-size: 11pt; font-weight: 600; padding: 8px 16px;"
-        )
-        create_btn.clicked.connect(self.create_project.emit)
-        layout.addWidget(create_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        open_auftrag_btn = QPushButton("Auftrag öffnen")
+        open_auftrag_btn.setMinimumWidth(320)
+        open_auftrag_btn.setMinimumHeight(38)
+        open_auftrag_btn.clicked.connect(self.open_auftrag.emit)
+        layout.addWidget(open_auftrag_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        open_btn = QPushButton("Bestehendes Projekt öffnen")
-        open_btn.setMinimumWidth(280)
-        open_btn.clicked.connect(self.open_project.emit)
-        layout.addWidget(open_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addSpacing(8)
+
+        standalone_btn = QPushButton("Nur Wohnflächenberechnung (ohne Auftrag)")
+        standalone_btn.setMinimumWidth(320)
+        standalone_btn.setMinimumHeight(38)
+        standalone_btn.clicked.connect(self.standalone_woflv.emit)
+        layout.addWidget(standalone_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        open_proj_btn = QPushButton("Bestehende Berechnung öffnen")
+        open_proj_btn.setMinimumWidth(320)
+        open_proj_btn.setMinimumHeight(38)
+        open_proj_btn.clicked.connect(self.open_standalone_project.emit)
+        layout.addWidget(open_proj_btn, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        settings_btn = QPushButton("Einstellungen …")
+        settings_btn.setMinimumWidth(320)
+        settings_btn.clicked.connect(self.settings_requested.emit)
+        layout.addWidget(settings_btn, alignment=Qt.AlignmentFlag.AlignCenter)
 
         hint = QLabel(
-            "Neues Projekt: Geschosse festlegen, Excel-Rohdatei importieren, "
-            "Objektdaten erfassen – danach Räume zuordnen und Flächen deklarieren."
+            "Empfohlener Ablauf: Auftrag anlegen → Angebot → Wohnflächenberechnung → Rechnung. "
+            "Dokumente werden im konfigurierten Ablageordner gespeichert."
         )
+        hint.setObjectName("hintText")
         hint.setWordWrap(True)
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        hint.setStyleSheet("color: #666; max-width: 520px; margin-top: 16px;")
         layout.addWidget(hint, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        outer.addWidget(card)

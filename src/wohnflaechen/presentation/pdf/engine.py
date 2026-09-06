@@ -5,6 +5,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from wohnflaechen.application.dto.pdf_document import PdfDocument
+from wohnflaechen.domain.enums.pdf_layout import PdfLayout
 from wohnflaechen.presentation.pdf.branding import (
     COMPANY_NAME,
     COMPANY_TAGLINE,
@@ -20,44 +21,131 @@ from wohnflaechen.presentation.pdf.branding import (
     STAMP_SIGNATURE,
 )
 from wohnflaechen.presentation.pdf.formatters import (
+    bauantrag_calculation_html,
     calculation_html,
+    multiline_html,
     name_html,
     paragraphs_html,
     preface_content_html,
 )
-
-_PACKAGE_DIR = Path(__file__).parent
-_TEMPLATES_DIR = _PACKAGE_DIR / "templates"
-_STATIC_DIR = _PACKAGE_DIR / "static"
+from wohnflaechen.presentation.paths import pdf_static_dir, pdf_templates_dir
+from wohnflaechen.presentation.pdf.weasyprint_support import (
+    PdfExportNotAvailableError,
+    get_weasyprint_html,
+)
 
 
 class PdfEngine:
     """Erzeugt PDF-Dokumente im Corporate Design."""
 
     def __init__(self, templates_dir: Path | None = None, static_dir: Path | None = None) -> None:
-        self._templates_dir = templates_dir or _TEMPLATES_DIR
-        self._static_dir = static_dir or _STATIC_DIR
+        self._templates_dir = templates_dir or pdf_templates_dir()
+        self._static_dir = static_dir or pdf_static_dir()
         self._env = Environment(
             loader=FileSystemLoader(self._templates_dir),
             autoescape=select_autoescape(["html", "xml"]),
         )
 
-    def render_pdf(self, document: PdfDocument, output_path: Path) -> Path:
+    def render_pdf(
+        self,
+        document: PdfDocument,
+        output_path: Path,
+        layout: PdfLayout = PdfLayout.STANDARD,
+    ) -> Path:
         try:
-            from weasyprint import HTML
-        except OSError as exc:
-            raise RuntimeError(
-                "PDF-Export benötigt die GTK3-Runtime für WeasyPrint unter Windows. "
-                "Anleitung: https://doc.courtbouillon.org/weasyprint/stable/"
-                "first_steps.html#windows"
-            ) from exc
+            HTML = get_weasyprint_html()
+        except PdfExportNotAvailableError:
+            raise
 
-        html_content = self._render_html(document)
+        html_content = self._render_html(document, layout)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        HTML(string=html_content, base_url=str(self._static_dir)).write_pdf(str(output_path))
+        try:
+            HTML(string=html_content, base_url=str(self._static_dir)).write_pdf(str(output_path))
+        except OSError as exc:
+            raise PdfExportNotAvailableError(
+                "Beim Schreiben des PDF ist ein Systemfehler aufgetreten "
+                "(häufig fehlende GTK-Bibliotheken unter Windows).\n\n"
+                f"Technische Details: {exc}"
+            ) from exc
         return output_path
 
-    def _render_html(self, document: PdfDocument) -> str:
+    def _render_html(self, document: PdfDocument, layout: PdfLayout) -> str:
+        if layout == PdfLayout.BAUANTRAG:
+            return self._render_bauantrag_html(document)
+        return self._render_standard_html(document)
+
+    def _render_bauantrag_html(self, document: PdfDocument) -> str:
+        template = self._env.get_template("document_bauantrag.html")
+        living_sections = []
+        for section in document.classic_living_sections:
+            living_sections.append(
+                {
+                    "heading": section.heading,
+                    "area_column_title": section.area_column_title,
+                    "sum_label": section.sum_label,
+                    "sum_value": section.sum_value,
+                    "rows": [
+                        {
+                            "number": row.number,
+                            "name_html": name_html(row.name),
+                            "calculation_html": bauantrag_calculation_html(row.calculation),
+                            "area_result": row.area_result,
+                        }
+                        for row in section.rows
+                    ],
+                }
+            )
+        usable_sections = []
+        for section in document.classic_usable_sections:
+            usable_sections.append(
+                {
+                    "heading": section.heading,
+                    "area_column_title": section.area_column_title,
+                    "sum_label": section.sum_label,
+                    "sum_value": section.sum_value,
+                    "rows": [
+                        {
+                            "number": row.number,
+                            "name_html": name_html(row.name),
+                            "calculation_html": bauantrag_calculation_html(row.calculation),
+                            "area_result": row.area_result,
+                        }
+                        for row in section.rows
+                    ],
+                }
+            )
+        living_summary = None
+        if document.classic_living_summary:
+            living_summary = {
+                "title": document.classic_living_summary.title,
+                "lines": document.classic_living_summary.lines,
+                "total_label": document.classic_living_summary.total_label,
+                "total_value": document.classic_living_summary.total_value,
+            }
+        usable_summary = None
+        if document.classic_usable_summary:
+            usable_summary = {
+                "title": document.classic_usable_summary.title,
+                "lines": document.classic_usable_summary.lines,
+                "total_label": document.classic_usable_summary.total_label,
+                "total_value": document.classic_usable_summary.total_value,
+            }
+        return template.render(
+            company_name=COMPANY_NAME,
+            object_name=document.object_name,
+            address=document.address,
+            client_html=multiline_html(document.client),
+            measure_html=multiline_html(document.measure_title),
+            editor=document.editor or "—",
+            footer_location=document.footer_location,
+            footer_date=document.footer_date,
+            classic_living_sections=living_sections,
+            classic_usable_sections=usable_sections,
+            classic_living_summary=living_summary,
+            classic_usable_summary=usable_summary,
+        )
+
+    def _render_standard_html(self, document: PdfDocument) -> str:
         template = self._env.get_template("document.html")
         floors = []
         page_offset = 2

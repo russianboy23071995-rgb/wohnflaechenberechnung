@@ -1,0 +1,24 @@
+---
+description: UI motion and interaction style for Wohnflächenberechnung desktop app
+globs: src/wohnflaechen/presentation/**
+alwaysApply: false
+---
+
+# Dynamische Oberfläche – Tisch-Metapher
+
+Die App soll sich **dynamisch und räumlich** anfühlen – wie ein Arbeitstisch, auf dem Bereiche hin- und hergeschoben, ein- und ausgeklappt werden. Keine harten Pop-ups oder abrupten Sprünge.
+
+## Pflicht bei neuen UI-Elementen
+
+1. **Ein-/Ausklappen** – Panels, Formulare, Bereiche: `wohnflaechen.presentation.motion.HeightMotionController` (Höhe + Transparenz, ~320 ms expand / ~260 ms collapse, OutCubic/InCubic).
+2. **Ansichtwechsel** – Hauptnavigation (Dashboard ↔ Auftrag ↔ WoFlV): `StackViewAnimator` mit leichtem Gleiten und Fade (~300 ms).
+3. **Kein separates Modal** für Stammdaten-Erfassung – inline klappbare Karten im Dashboard-Stil bevorzugen.
+4. **Visuelle Gruppierung** – logische Felder in `formGroup`-Karten mit Titel und Kurzhinweis.
+
+## Design bleibt
+
+Hellgrauer Hintergrund, weiße Karten, abgerundete Ecken, Charcoal-Buttons – Produkt-Look wie das Dashboard; Motion ergänzt, ersetzt nicht das Layout.
+
+## Konstanten
+
+Dauer und Easing nur in `motion.py` ändern – nicht pro Widget duplizieren.

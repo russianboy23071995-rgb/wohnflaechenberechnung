@@ -1,5 +1,7 @@
 """Raum-Pool – zentrale Arbeitsoberfläche mit Mehrfachauswahl und Drag-and-Drop."""
 
+from collections.abc import Callable
+
 from PySide6.QtCore import Qt, Signal, QMimeData
 from PySide6.QtGui import QColor, QDrag
 from PySide6.QtWidgets import (
@@ -35,14 +37,14 @@ COL_NOTE = 7
 COMBO_COLUMNS = {COL_FLOOR, COL_AREA_TYPE, COL_FACTOR}
 
 FLOOR_ROW_COLORS = [
-    "#eef4fb",
-    "#f3eef8",
-    "#eef8f3",
-    "#faf3ee",
-    "#f0f0f8",
-    "#f8f5ee",
+    "#e8f4fc",
+    "#eef0fa",
+    "#e8f8f4",
+    "#faf4ee",
+    "#f0f2fa",
+    "#f8f6ee",
     "#eef6f6",
-    "#f6eef0",
+    "#f6eef2",
 ]
 
 
@@ -95,15 +97,24 @@ class RoomPoolWidget(QWidget):
         self._rooms: list[Room] = []
         self._floors: list[Floor] = []
         self._filter_floor_id: int | None | str = None
+        self._record_undo: Callable[[], None] | None = None
         self._build_ui()
+
+    def set_undo_recorder(self, recorder: Callable[[], None] | None) -> None:
+        self._record_undo = recorder
+
+    def _snapshot_undo(self) -> None:
+        if self._record_undo:
+            self._record_undo()
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
         header = QHBoxLayout()
         self.filter_label = QLabel("Alle Räume")
-        self.filter_label.setStyleSheet("font-weight: 600;")
+        self.filter_label.setObjectName("sectionTitle")
         header.addWidget(self.filter_label)
         header.addStretch()
         layout.addLayout(header)
@@ -148,7 +159,12 @@ class RoomPoolWidget(QWidget):
     def set_project(self, project_id: int | None) -> None:
         self._project_id = project_id
         self._filter_floor_id = None
+        self._filter_building_id = None
         self.filter_label.setText("Alle Räume")
+        self.refresh()
+
+    def set_building_filter(self, building_id: int | None) -> None:
+        self._filter_building_id = building_id
         self.refresh()
 
     def set_floor_filter(self, floor_filter: int | None | str) -> None:
@@ -182,6 +198,11 @@ class RoomPoolWidget(QWidget):
         else:
             self._rooms = list(all_rooms)
 
+        if self._filter_building_id is not None:
+            self._rooms = [
+                room for room in self._rooms if room.building_id == self._filter_building_id
+            ]
+
         show_floor_colors = self._filter_floor_id is None
         self.table.setAlternatingRowColors(not show_floor_colors)
 
@@ -212,6 +233,7 @@ class RoomPoolWidget(QWidget):
         return ids
 
     def assign_rooms_to_floor(self, floor_id: int | None, room_ids: list[int]) -> None:
+        self._snapshot_undo()
         actual_floor_id = None if floor_id == -1 else floor_id
         self._room_service.assign_floor(room_ids, actual_floor_id)
         self.refresh()
@@ -242,6 +264,7 @@ class RoomPoolWidget(QWidget):
                 "Bitte mindestens einen Raum in der Tabelle markieren.",
             )
             return
+        self._snapshot_undo()
         self._room_service.set_area_type_bulk(room_ids, area_type)
         self.refresh()
         self.rooms_changed.emit()
@@ -284,7 +307,7 @@ class RoomPoolWidget(QWidget):
             widget = self.table.cellWidget(row, col)
             if isinstance(widget, QComboBox):
                 widget.setStyleSheet(
-                    f"QComboBox {{ background-color: {color_hex}; border: 1px solid #ccc; }}"
+                    f"QComboBox {{ background-color: {color_hex}; border: 1px solid #cdd9e8; }}"
                 )
 
     def _set_item(self, row: int, col: int, text: str, editable: bool) -> None:
@@ -338,6 +361,7 @@ class RoomPoolWidget(QWidget):
         row = self._combo_row(combo, COL_FLOOR)
         if row is None or row >= len(self._rooms):
             return
+        self._snapshot_undo()
         room = self._rooms[row]
         room.floor_id = combo.currentData()
         self._update_area_display(row, room)
@@ -351,6 +375,7 @@ class RoomPoolWidget(QWidget):
         row = self._combo_row(combo, COL_AREA_TYPE)
         if row is None or row >= len(self._rooms):
             return
+        self._snapshot_undo()
         room = self._rooms[row]
         value = combo.currentData()
         room.area_type = AreaType(value) if value else AreaType.NONE
@@ -364,6 +389,7 @@ class RoomPoolWidget(QWidget):
         row = self._combo_row(combo, COL_FACTOR)
         if row is None or row >= len(self._rooms):
             return
+        self._snapshot_undo()
         room = self._rooms[row]
         for factor in Factor:
             if factor.value == combo.currentData():
@@ -383,6 +409,7 @@ class RoomPoolWidget(QWidget):
     def _on_cell_changed(self, row: int, column: int) -> None:
         if row >= len(self._rooms) or column in COMBO_COLUMNS:
             return
+        self._snapshot_undo()
         room = self._rooms[row]
         item = self.table.item(row, column)
         if not item:
@@ -453,6 +480,7 @@ class RoomPoolWidget(QWidget):
     def _add_room(self) -> None:
         if self._project_id is None:
             return
+        self._snapshot_undo()
         room = self._room_service.create_room(self._project_id)
         self._rooms.append(room)
         self._append_room_row(room)
@@ -470,6 +498,7 @@ class RoomPoolWidget(QWidget):
         )
         if confirm != QMessageBox.StandardButton.Yes:
             return
+        self._snapshot_undo()
         for row in rows:
             if row >= len(self._rooms):
                 continue

@@ -12,3 +12,4 @@ class ImportedRoom:
     raw_area: float
     floor_name: str
     calculation_path: str = ""
+    building_id: int | None = None

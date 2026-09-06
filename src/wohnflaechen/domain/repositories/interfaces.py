@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from wohnflaechen.domain.entities.building import Building
 from wohnflaechen.domain.entities.floor import Floor
 from wohnflaechen.domain.entities.project import Project
 from wohnflaechen.domain.entities.room import Room
@@ -16,6 +17,10 @@ class ProjectRepository(ABC):
         ...
 
     @abstractmethod
+    def list_by_auftrag(self, auftrag_id: int) -> list[Project]:
+        ...
+
+    @abstractmethod
     def get_by_id(self, project_id: int) -> Optional[Project]:
         ...
 
@@ -25,6 +30,32 @@ class ProjectRepository(ABC):
 
     @abstractmethod
     def delete(self, project_id: int) -> None:
+        ...
+
+
+class BuildingRepository(ABC):
+    @abstractmethod
+    def list_by_project(self, project_id: int) -> list[Building]:
+        ...
+
+    @abstractmethod
+    def get_by_id(self, building_id: int) -> Optional[Building]:
+        ...
+
+    @abstractmethod
+    def get_by_prefix(self, project_id: int, room_prefix: str) -> Optional[Building]:
+        ...
+
+    @abstractmethod
+    def save(self, building: Building) -> Building:
+        ...
+
+    @abstractmethod
+    def delete(self, building_id: int) -> None:
+        ...
+
+    @abstractmethod
+    def reorder(self, project_id: int, building_ids: list[int]) -> None:
         ...
 
 
@@ -69,6 +100,10 @@ class RoomRepository(ABC):
 
     @abstractmethod
     def delete(self, room_id: int) -> None:
+        ...
+
+    @abstractmethod
+    def restore(self, room: Room) -> Room:
         ...
 
 

@@ -38,6 +38,9 @@ class ProjectService:
     def list_projects(self) -> list[Project]:
         return self._projects.list_all()
 
+    def list_projects_for_auftrag(self, auftrag_id: int) -> list[Project]:
+        return self._projects.list_by_auftrag(auftrag_id)
+
     def get_project(self, project_id: int) -> Optional[Project]:
         return self._projects.get_by_id(project_id)
 
@@ -53,6 +56,13 @@ class ProjectService:
         saved = self._projects.save(project)
         self._sync_preface(saved)
         return saved
+
+    def set_project_completed(self, project_id: int, completed: bool) -> Project | None:
+        project = self._projects.get_by_id(project_id)
+        if project is None:
+            return None
+        project.completed = completed
+        return self._projects.save(project)
 
     def ensure_preface(self, project_id: int) -> None:
         """Füllt leere Vorbemerkungen mit Standardtexten."""

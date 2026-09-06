@@ -15,7 +15,17 @@ from wohnflaechen.infrastructure.data_import.import_models import ImportedRoom
 COLUMN_ALIASES = {
     "name": ["raumname", "name", "room name", "room_name", "raum", "raumbeschreibung"],
     "number": ["raumnummer", "nummer", "number", "room number", "raumnr", "nr", "nr."],
-    "area": ["fläche", "flaeche", "area", "fläche m²", "flaeche m2", "m²", "m2"],
+    "area": [
+        "fläche",
+        "flaeche",
+        "area",
+        "fläche m²",
+        "flaeche m2",
+        "fläche [m²]",
+        "flaeche [m2]",
+        "m²",
+        "m2",
+    ],
     "floor": ["geschoss", "floor", "ebene", "level", "stockwerk"],
 }
 
@@ -55,19 +65,31 @@ class ExcelImporter:
     """Liest Archicad-Excel-Dateien und erzeugt Raumdaten."""
 
     def import_file(self, file_path: Path) -> list[ImportedRoom]:
-        df = pd.read_excel(file_path, header=None, engine="openpyxl")
-        if df.empty:
-            return []
+        excel = pd.ExcelFile(file_path, engine="openpyxl")
+        best: list[ImportedRoom] = []
 
+        for sheet_name in excel.sheet_names:
+            df = pd.read_excel(file_path, sheet_name=sheet_name, header=None, engine="openpyxl")
+            if df.empty:
+                continue
+            rooms = self._import_dataframe(df)
+            if len(rooms) > len(best):
+                best = rooms
+
+        return best
+
+    def _import_dataframe(self, df: pd.DataFrame) -> list[ImportedRoom]:
         if is_archicad_woflv_format(df):
             return parse_archicad_woflv(df)
-
         return self._import_tabular(df)
 
     def _import_tabular(self, df: pd.DataFrame) -> list[ImportedRoom]:
         """Fallback für tabellarische Exporte mit Spaltenköpfen."""
         if df.shape[1] < 2:
             return []
+
+        if is_archicad_woflv_format(df):
+            return parse_archicad_woflv(df)
 
         header_row = None
         for row_idx in range(min(20, len(df))):
@@ -145,6 +167,7 @@ class ExcelImporter:
                 Room(
                     project_id=project_id,
                     floor_id=floor_id,
+                    building_id=item.building_id,
                     name=item.name,
                     number=item.number,
                     raw_area=item.raw_area,

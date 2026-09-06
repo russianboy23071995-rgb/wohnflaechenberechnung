@@ -183,7 +183,7 @@ class ImportPage(QWizardPage):
             "Die Datei kann auch später über Datei → Excel importieren nachgeladen werden."
         )
         hint.setWordWrap(True)
-        hint.setStyleSheet("color: #555;")
+        hint.setObjectName("hintText")
         layout.addWidget(hint)
 
     def _browse(self) -> None:

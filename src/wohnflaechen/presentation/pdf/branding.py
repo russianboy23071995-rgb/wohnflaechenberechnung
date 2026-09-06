@@ -1,11 +1,11 @@
-"""Corporate Design – NOVIKOV | PLAN & Maß."""
+"""Corporate Design – NOVIKOV | PLAN & MAß."""
 
 from pathlib import Path
 
 _PACKAGE_DIR = Path(__file__).parent
 _STATIC_DIR = _PACKAGE_DIR / "static"
 
-COMPANY_NAME = "NOVIKOV | PLAN & Maß"
+COMPANY_NAME = "NOVIKOV | PLAN & MAß"
 COMPANY_TAGLINE = "Immobilien Erfassen, Digitalisieren & Visualisieren"
 
 # Fußzeile laut Vorlage (ASCII-Schreibweise)

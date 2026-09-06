@@ -11,6 +11,7 @@ class TextBlockType(str, Enum):
     METHODOLOGY = "methodology"
     LIABILITY = "liability"
     SPECIAL_NOTES = "special_notes"
+    MEASURE = "measure"
 
     @property
     def label(self) -> str:
@@ -20,5 +21,6 @@ class TextBlockType(str, Enum):
             TextBlockType.METHODOLOGY: "Aufmaßmethodik",
             TextBlockType.LIABILITY: "Haftungshinweise",
             TextBlockType.SPECIAL_NOTES: "Besondere Hinweise",
+            TextBlockType.MEASURE: "Maßnahme",
         }
         return labels[self]
