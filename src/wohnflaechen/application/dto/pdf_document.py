@@ -36,11 +36,38 @@ class PdfFloorTotal:
 
 
 @dataclass
+class PdfClassicTableRow:
+    number: str
+    name: str
+    calculation: str
+    area_result: str
+
+
+@dataclass
+class PdfClassicSection:
+    heading: str
+    area_column_title: str
+    rows: list[PdfClassicTableRow] = field(default_factory=list)
+    sum_label: str = ""
+    sum_value: str = ""
+
+
+@dataclass
+class PdfClassicSummary:
+    title: str
+    lines: list[tuple[str, str]] = field(default_factory=list)
+    total_label: str = ""
+    total_value: str = ""
+
+
+@dataclass
 class PdfDocument:
     """Vollständiges Dokument für beliebige Ausgabeformate."""
 
     object_name: str = ""
     address: str = ""
+    client: str = ""
+    measure_title: str = ""
     object_description: str = ""
     preface: str = ""
     methodology: str = ""
@@ -53,4 +80,7 @@ class PdfDocument:
     footer_location: str = "Hamburg"
     footer_date: str = ""
     editor: str = ""
-    client: str = ""
+    classic_living_sections: list[PdfClassicSection] = field(default_factory=list)
+    classic_usable_sections: list[PdfClassicSection] = field(default_factory=list)
+    classic_living_summary: PdfClassicSummary | None = None
+    classic_usable_summary: PdfClassicSummary | None = None

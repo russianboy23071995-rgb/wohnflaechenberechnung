@@ -7,9 +7,12 @@
 </head>
 <body>
 
+{% include 'footer_margin_base.html' %}
+
 <!-- Deckblatt -->
 <section class="page cover-page">
     {% set page_number = 1 %}
+    {% include 'footer.html' %}
     {% include 'header.html' %}
 
     <div class="page-body">
@@ -68,14 +71,13 @@
         </div>
         {% endif %}
     </div>
-
-    {% include 'footer.html' %}
 </section>
 
 <!-- Geschoss-Seiten -->
 {% for floor in floors %}
 <section class="page floor-page">
     {% set page_number = floor.page_number %}
+    {% include 'footer.html' %}
     {% include 'header.html' %}
 
     <div class="page-body">
@@ -116,14 +118,13 @@
             </tbody>
         </table>
     </div>
-
-    {% include 'footer.html' %}
 </section>
 {% endfor %}
 
 <!-- Zusammenfassung -->
 <section class="page summary-page">
     {% set page_number = summary_page_number %}
+    {% include 'footer.html' %}
     {% include 'header.html' %}
 
     <div class="page-body">
@@ -177,8 +178,6 @@
             <p class="footer-date">{{ footer_location }}, {{ footer_date }}</p>
         </div>
     </div>
-
-    {% include 'footer.html' %}
 </section>
 
 </body>

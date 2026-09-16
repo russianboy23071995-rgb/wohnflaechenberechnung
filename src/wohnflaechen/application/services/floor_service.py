@@ -12,16 +12,40 @@ class FloorService:
     def __init__(self, floor_repository: FloorRepository) -> None:
         self._floors = floor_repository
 
-    def list_floors(self, project_id: int) -> list[Floor]:
-        return self._floors.list_by_project(project_id)
+    def list_floors(
+        self,
+        project_id: int,
+        building_id: int | None | str = "all",
+    ) -> list[Floor]:
+        floors = self._floors.list_by_project(project_id)
+        if building_id == "all":
+            return floors
+        return [floor for floor in floors if floor.building_id == building_id]
 
     def get_floor(self, floor_id: int) -> Optional[Floor]:
         return self._floors.get_by_id(floor_id)
 
-    def create_floor(self, project_id: int, name: str) -> Floor:
-        existing = self._floors.list_by_project(project_id)
+    def create_floor(
+        self,
+        project_id: int,
+        name: str,
+        building_id: int | None = None,
+    ) -> Floor:
+        if building_id is not None:
+            existing = [
+                floor
+                for floor in self._floors.list_by_project(project_id)
+                if floor.building_id == building_id
+            ]
+        else:
+            existing = [
+                floor
+                for floor in self._floors.list_by_project(project_id)
+                if floor.building_id is None
+            ]
         floor = Floor(
             project_id=project_id,
+            building_id=building_id,
             name=name.strip(),
             sort_order=len(existing),
         )

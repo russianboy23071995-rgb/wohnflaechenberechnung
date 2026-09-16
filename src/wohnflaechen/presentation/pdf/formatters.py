@@ -4,7 +4,6 @@ import re
 
 from markupsafe import escape, Markup
 
-_SECTION_TITLE_PATTERN = re.compile(r"^(\d+\.\s.+)$", re.MULTILINE)
 _NUMBER_PATTERN = re.compile(r"\d+,\d+")
 
 
@@ -16,6 +15,17 @@ def _round_german_number(match: re.Match[str]) -> str:
 def round_calculation_text(text: str) -> str:
     """Rundet alle Dezimalzahlen in Berechnungswegen auf zwei Nachkommastellen."""
     return _NUMBER_PATTERN.sub(_round_german_number, text)
+
+
+def _calc_line(prefix: str, body: str) -> str:
+    """Eine Berechnungszeile mit fixer Prefix-Spalte für einheitliche Ausrichtung."""
+    prefix_text = f"{prefix} " if prefix else ""
+    return (
+        f'<span class="calc-line">'
+        f'<span class="calc-prefix">{escape(prefix_text)}</span>'
+        f'<span class="calc-content">{escape(body)}</span>'
+        f"</span>"
+    )
 
 
 def calculation_html(text: str) -> Markup:
@@ -33,25 +43,28 @@ def calculation_html(text: str) -> Markup:
             continue
 
         if line.startswith("Abzüge"):
-            if html_lines:
-                html_lines.append("<br/>")
-            html_lines.append(str(escape(line)))
+            html_lines.append(f'<span class="calc-section">{escape(line)}</span>')
             line_in_section = 0
             continue
 
-        if line.startswith("- ") or line.startswith("+ "):
-            html_lines.append(str(escape(line)))
+        if line.startswith("- "):
+            html_lines.append(_calc_line("-", line[2:].strip()))
+            line_in_section += 1
+            continue
+
+        if line.startswith("+ "):
+            html_lines.append(_calc_line("+", line[2:].strip()))
             line_in_section += 1
             continue
 
         if line_in_section == 0:
-            html_lines.append(str(escape(line)))
+            html_lines.append(_calc_line("", line))
         else:
-            html_lines.append(str(escape(f"+ {line}")))
+            html_lines.append(_calc_line("+", line))
 
         line_in_section += 1
 
-    return Markup("<br/>".join(html_lines))
+    return Markup("".join(html_lines))
 
 
 def name_html(text: str) -> Markup:
@@ -94,6 +107,35 @@ def preface_content_html(text: str) -> Markup:
             parts.append(f"<p>{multiline_html(block)}</p>")
 
     return Markup("".join(parts))
+
+
+def bauantrag_calculation_html(text: str) -> Markup:
+    """Berechnungsweg im Bauantrag-Layout (einfache Zeilen)."""
+    if not text:
+        return Markup("")
+
+    text = round_calculation_text(text)
+    lines: list[str] = []
+    for raw_line in text.split("\n"):
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("Abzüge"):
+            lines.append(f'<div class="calc-line calc-section">{escape(line)}</div>')
+            continue
+        prefix = ""
+        body = line
+        if line.startswith("- "):
+            prefix = "- "
+            body = line[2:].strip()
+        elif line.startswith("+ "):
+            prefix = "+ "
+            body = line[2:].strip()
+        lines.append(
+            f'<div class="calc-line"><span class="calc-prefix">{escape(prefix)}</span>'
+            f'<span class="calc-body">{escape(body)}</span></div>'
+        )
+    return Markup("".join(lines))
 
 
 def paragraphs_html(text: str) -> Markup:

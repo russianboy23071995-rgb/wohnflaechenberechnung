@@ -10,6 +10,7 @@ class Project:
     """Stammdaten eines Wohnflächenberechnungs-Projekts."""
 
     id: Optional[int] = None
+    auftrag_id: Optional[int] = None
     name: str = ""
     object_name: str = ""
     address: str = ""
@@ -21,6 +22,7 @@ class Project:
     created_at: Optional[datetime] = None
     notes: str = ""
     file_path: str = ""
+    completed: bool = False
 
     def display_title(self) -> str:
         if self.object_name:

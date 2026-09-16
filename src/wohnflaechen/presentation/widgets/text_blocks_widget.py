@@ -23,15 +23,18 @@ class TextBlocksWidget(QWidget):
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
         info = QLabel(
-            "Die Vorbemerkungen (Punkte 1–6) werden beim Anlegen eines Projekts "
-            "automatisch mit Standardtexten eingefügt. Punkt 3 passt sich der "
-            "Aufmaß-Auswahl in den Projektdaten an. Weitere Texte erscheinen in der PDF."
+            "Objektbeschreibung, Methodik, Haftung und Hinweise erscheinen im PDF. "
+            "Die Vorbemerkungen (Variante Aufmaß / Variante Pläne) bearbeiten Sie unter "
+            "Projekt → Vorbemerkungen bearbeiten."
         )
         info.setWordWrap(True)
+        info.setObjectName("hintText")
         layout.addWidget(info)
 
         self.tabs = QTabWidget()
         for block_type in TextBlockType:
+            if block_type.is_preface:
+                continue
             editor = QTextEdit()
             self._editors[block_type] = editor
             self.tabs.addTab(editor, block_type.label)

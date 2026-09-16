@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Wohnflächenberechnung – {{ object_name }}</title>
+    <link rel="stylesheet" href="styles_bauantrag.css"/>
+</head>
+<body>
+
+{% macro classic_table(section) %}
+<table class="classic-table">
+    <thead>
+        <tr>
+            <th class="col-number">Raumnr.:</th>
+            <th class="col-name">Bezeichnung:</th>
+            <th class="col-calc">Berechnung:</th>
+            <th class="col-area">{{ section.area_column_title }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in section.rows %}
+        <tr>
+            <td class="col-number">{{ row.number }}</td>
+            <td class="col-name">{{ row.name_html }}</td>
+            <td class="col-calc">{{ row.calculation_html }}</td>
+            <td class="col-area">{{ row.area_result }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% if section.sum_label %}
+<div class="floor-sum">{{ section.sum_label }} {{ section.sum_value }}</div>
+{% endif %}
+{% endmacro %}
+
+{% macro summary_block(summary) %}
+<div class="summary-block">
+    <div class="summary-title">{{ summary.title }}</div>
+    <table class="summary-table">
+        {% for label, value in summary.lines %}
+        <tr>
+            <td class="label">{{ label }}</td>
+            <td class="value">{{ value }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="summary-total">
+            <td class="label">{{ summary.total_label }}</td>
+            <td class="value">{{ summary.total_value }}</td>
+        </tr>
+    </table>
+</div>
+{% endmacro %}
+
+<section class="page">
+    <table class="plankopf-table">
+        <tr>
+            <td class="plankopf-label">Objekt:</td>
+            <td class="plankopf-value">{{ object_name }}{% if address %}<br/>{{ address }}{% endif %}</td>
+        </tr>
+        <tr>
+            <td class="plankopf-label">Bauherr:</td>
+            <td class="plankopf-value">{{ client_html }}</td>
+        </tr>
+        <tr>
+            <td class="plankopf-label">Maßnahme:</td>
+            <td class="plankopf-value">{{ measure_html }}</td>
+        </tr>
+    </table>
+
+    <div class="title-block">
+        <div class="title-main">- Wohn-, und Nutzflächenberechnung -</div>
+        <div class="title-sub">nach Wohnflächenverordnung (WoFlV)</div>
+    </div>
+
+    {% for section in classic_living_sections %}
+    <div class="section-heading">{{ section.heading }}</div>
+    {{ classic_table(section) }}
+    {% endfor %}
+</section>
+
+{% if classic_living_summary %}
+<section class="page">
+    {{ summary_block(classic_living_summary) }}
+
+    {% if classic_usable_sections %}
+    <div class="section-number">4. Nutzflächenberechnung</div>
+    {% for section in classic_usable_sections %}
+    <div class="section-heading">{{ section.heading }}</div>
+    {{ classic_table(section) }}
+    {% endfor %}
+    {% endif %}
+
+    {% if classic_usable_summary %}
+    <div class="section-number">5. Zusammenfassung der Nutzfläche</div>
+    {{ summary_block(classic_usable_summary) }}
+    {% endif %}
+
+    <div class="signature-block">
+        <div class="label">Aufgestellt:</div>
+        <div class="name">{{ editor }}</div>
+        <div>{{ company_name }}</div>
+    </div>
+
+    <div class="company-footer">
+        {{ company_name }} · {{ footer_location }}, {{ footer_date }}
+    </div>
+</section>
+{% endif %}
+
+</body>
+</html>

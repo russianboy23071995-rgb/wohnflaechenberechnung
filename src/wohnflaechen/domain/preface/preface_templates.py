@@ -1,7 +1,6 @@
-"""Standardtexte für die Vorbemerkungen (WoFlV-Vorlage)."""
+"""Standardtexte für die Vorbemerkungen (zwei Varianten)."""
 
 from dataclasses import dataclass
-from datetime import date
 
 
 @dataclass(frozen=True)
@@ -11,69 +10,142 @@ class PrefaceSection:
     default_body: str
 
 
-SECTION_1_BODY = (
-    "Die vorliegende Wohnflächenberechnung wurde gemäß der Verordnung zur "
-    "Berechnung der Wohnfläche (Wohnflächenverordnung – WoFlV) in der jeweils "
-    "gültigen Fassung erstellt."
-)
-
-SECTION_2_BODY = (
-    "Die Datenerhebung erfolgte vor Ort durch eine fachkundige Person "
-    "(Bachelor of Architecture) unter Anwendung eines hybriden Aufmaß-Verfahrens. "
-    "Hierbei wurde die digitale LiDAR-gestützte Raum-Erfassung durch manuelle "
-    "Referenzmessungen (Laser-Distanzmessung), mechanische Winkelprüfung sowie "
-    "eine bautechnische Plausibilitätskontrolle validiert.\n\n"
-    "Diese methodische Kombination garantiert eine präzise Abbildung der baulichen "
-    "Gegebenheiten und erfüllt die Anforderungen für Bankfinanzierungen und "
-    "notarielle Unterlagen."
-)
-
-SECTION_3_BODY_NO_MEASUREMENT = (
-    "Es wurde kein Aufmaß erstellt. Die folgende Berechnung wurde anhand von "
-    "vorliegender Bestandsunterlagen erstellt."
-)
-
-SECTION_4_BODY = (
-    "Abweichungen im Bereich üblicher Messtoleranzen sind aufgrund von Putzstärken, "
-    "Bauteilunebenheiten sowie konstruktiven und materialbedingten Verformungen "
-    "möglich.\n\n"
-    "Alle Flächenangaben wurden auf zwei Dezimalstellen gerundet. "
-    "(z.B.10,445 → 10,45)"
-)
-
-SECTION_5_BODY = (
-    "Diese Wohnflächenberechnung dient ausschließlich der Flächenermittlung nach WoFlV.\n\n"
-    "Sie stellt keine baurechtliche Prüfung, keine Genehmigungsbewertung und keine "
-    "statische oder technische Zustandsbeurteilung des Gebäudes dar."
-)
-
-SECTION_6_BODY = (
-    "Die vorliegende Wohnflächenberechnung sowie die zugehörigen Grundrissdarstellungen "
-    "wurden auf Grundlage eines Vor-Ort Aufmaßes erstellt. Eine Gewähr für die "
-    "Richtigkeit, Vollständigkeit sowie Maßhaltigkeit der Angaben wird ausdrücklich "
-    "nicht übernommen. Abweichungen zum tatsächlichen Bestand können nicht "
-    "ausgeschlossen werden."
-)
-
-DEFAULT_PREFACE_SECTIONS: tuple[PrefaceSection, ...] = (
-    PrefaceSection(1, "1. Grundlagen der Ermittlung", SECTION_1_BODY),
-    PrefaceSection(2, "2. Methodik des Aufmaßes", SECTION_2_BODY),
-    PrefaceSection(3, "3. Stichtag der Aufnahme", ""),
-    PrefaceSection(4, "4. Messgenauigkeit und Toleranzen", SECTION_4_BODY),
-    PrefaceSection(5, "5. Zweck und Geltungsbereich der Berechnung", SECTION_5_BODY),
-    PrefaceSection(6, "6. Haftungshinweis", SECTION_6_BODY),
-)
-
-
-def section_3_with_measurement(measurement_date: date) -> str:
-    formatted = measurement_date.strftime("%d.%m.%Y")
-    return (
-        f"Das Aufmaß erfolgte am {formatted}. Jegliche danach getätigte bauliche "
-        "Veränderungen, sind nicht berücksichtigt."
+def _format_sections(sections: tuple[PrefaceSection, ...]) -> str:
+    return "\n\n".join(
+        f"{section.title}\n{section.default_body.strip()}" for section in sections
     )
 
 
-def section_3_body(measurement_on_site: bool, measurement_date: date | None) -> str:
-    if measurement_on_site and measurement_date:
-        return section_3_with_measurement(measurement_date)
-    return SECTION_3_BODY_NO_MEASUREMENT
+PREFACE_ON_SITE_SECTIONS: tuple[PrefaceSection, ...] = (
+    PrefaceSection(
+        1,
+        "1. Grundlagen der Ermittlung",
+        (
+            "Die vorliegende Wohnflächenberechnung wurde gemäß der Verordnung zur "
+            "Berechnung der Wohnfläche (Wohnflächenverordnung – WoFlV) in der jeweils "
+            "gültigen Fassung erstellt."
+        ),
+    ),
+    PrefaceSection(
+        2,
+        "2. Methodik des Aufmaßes",
+        (
+            "Die Datenerhebung erfolgte vor Ort durch eine fachkundige Person "
+            "(Bachelor of Architecture) unter Anwendung eines hybriden Aufmaßverfahrens. "
+            "Hierbei wurde die digitale LiDAR-gestützte Raumerfassung durch manuelle "
+            "Referenzmessungen mittels Laser-Distanzmessgerät, mechanische Winkelprüfung "
+            "sowie eine bautechnische Plausibilitätskontrolle ergänzt und validiert.\n\n"
+            "Die erfassten Maße und räumlichen Gegebenheiten bilden die Grundlage der "
+            "nachfolgenden Wohnflächenberechnung."
+        ),
+    ),
+    PrefaceSection(
+        3,
+        "3. Stichtag der Aufnahme",
+        (
+            "Die Wohnflächenberechnung gibt die zum Zeitpunkt des Vor-Ort-Aufmaßes "
+            "festgestellten baulichen Gegebenheiten wieder. Nachträgliche bauliche "
+            "Veränderungen sind nicht Bestandteil dieser Berechnung.\n\n"
+            "Aufmaß erfolgt am: "
+        ),
+    ),
+    PrefaceSection(
+        4,
+        "4. Messgenauigkeit und Toleranzen",
+        (
+            "Abweichungen im Bereich üblicher Mess- und Bautoleranzen können aufgrund "
+            "von Putzstärken, Bauteilunebenheiten sowie konstruktions- und "
+            "materialbedingten Gegebenheiten nicht vollständig ausgeschlossen werden.\n\n"
+            "Alle Flächenangaben wurden auf zwei Dezimalstellen gerundet "
+            "(z. B. 10,445 m² → 10,45 m²)."
+        ),
+    ),
+    PrefaceSection(
+        5,
+        "5. Zweck und Geltungsbereich",
+        (
+            "Diese Wohnflächenberechnung dient der Flächenermittlung nach WoFlV.\n\n"
+            "Sie stellt keine baurechtliche Prüfung, Genehmigungsbewertung sowie keine "
+            "statische oder technische Zustandsbeurteilung des Gebäudes dar."
+        ),
+    ),
+    PrefaceSection(
+        6,
+        "6. Hinweis zur Berechnungsgrundlage",
+        (
+            "Die Wohnflächenberechnung und die zugehörigen Grundrissdarstellungen wurden "
+            "auf Grundlage des durchgeführten Vor-Ort-Aufmaßes erstellt. Trotz sorgfältiger "
+            "Aufnahme und Berechnung können geringfügige Abweichungen innerhalb üblicher "
+            "Mess-, Bau- und Rundungstoleranzen nicht vollständig ausgeschlossen werden."
+        ),
+    ),
+)
+
+
+PREFACE_FROM_PLANS_SECTIONS: tuple[PrefaceSection, ...] = (
+    PrefaceSection(
+        1,
+        "1. Grundlagen der Ermittlung",
+        (
+            "Die vorliegende Wohnflächenberechnung wurde gemäß der Verordnung zur "
+            "Berechnung der Wohnfläche (Wohnflächenverordnung – WoFlV) in der jeweils "
+            "gültigen Fassung erstellt."
+        ),
+    ),
+    PrefaceSection(
+        2,
+        "2. Berechnungsgrundlage",
+        (
+            "Die Wohnflächenberechnung wurde auf Grundlage der zur Verfügung gestellten "
+            "Plan- und Bauunterlagen erstellt. Die für die Berechnung erforderlichen Maße "
+            "und Angaben wurden diesen Unterlagen entnommen.\n\n"
+            "Seitens des Auftraggebers wurde bestätigt, dass die zur Verfügung gestellten "
+            "Planunterlagen dem aktuellen bzw. tatsächlich ausgeführten Stand des "
+            "Gebäudes entsprechen."
+        ),
+    ),
+    PrefaceSection(
+        3,
+        "3. Grundlage der Flächenermittlung",
+        (
+            "Die in den Planunterlagen enthaltenen Maße und baulichen Angaben wurden der "
+            "Wohnflächenberechnung zugrunde gelegt.\n\n"
+            "Die Übereinstimmung der übergebenen Planunterlagen mit dem tatsächlichen "
+            "Gebäudebestand wird entsprechend der Bestätigung des Auftraggebers "
+            "vorausgesetzt."
+        ),
+    ),
+    PrefaceSection(
+        4,
+        "4. Berechnungsgenauigkeit und Rundung",
+        (
+            "Die Flächen wurden rechnerisch auf Grundlage der in den Planunterlagen "
+            "enthaltenen Maße ermittelt.\n\n"
+            "Alle Flächenangaben wurden auf zwei Dezimalstellen gerundet "
+            "(z. B. 10,445 m² → 10,45 m²)."
+        ),
+    ),
+    PrefaceSection(
+        5,
+        "5. Zweck und Geltungsbereich",
+        (
+            "Diese Wohnflächenberechnung dient der Flächenermittlung nach WoFlV.\n\n"
+            "Sie stellt keine baurechtliche Prüfung, Genehmigungsbewertung sowie keine "
+            "statische oder technische Zustandsbeurteilung des Gebäudes dar."
+        ),
+    ),
+    PrefaceSection(
+        6,
+        "6. Hinweis zur Berechnungsgrundlage",
+        (
+            "Die Richtigkeit und Aktualität der zur Verfügung gestellten Plan- und "
+            "Bauunterlagen sowie deren Übereinstimmung mit dem tatsächlich ausgeführten "
+            "Gebäudebestand wurden durch den Auftraggeber bestätigt und der Berechnung "
+            "zugrunde gelegt."
+        ),
+    ),
+)
+
+
+DEFAULT_PREFACE_ON_SITE = _format_sections(PREFACE_ON_SITE_SECTIONS)
+DEFAULT_PREFACE_FROM_PLANS = _format_sections(PREFACE_FROM_PLANS_SECTIONS)

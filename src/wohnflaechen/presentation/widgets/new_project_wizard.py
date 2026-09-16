@@ -53,6 +53,14 @@ class ProjectInfoPage(QWizardPage):
         layout.addRow("Bearbeiter", self.editor_edit)
         layout.addRow(self.measurement_on_site)
         layout.addRow("Aufmaßdatum", self.measurement_date_edit)
+        hint = QLabel(
+            "Mit Aufmaß: Vorbemerkungen Variante 1. Ohne Aufmaß: Variante 2 "
+            "(vorhandene Pläne). Die Texte können später unter Projekt → "
+            "Vorbemerkungen bearbeitet werden."
+        )
+        hint.setWordWrap(True)
+        hint.setObjectName("hintText")
+        layout.addRow(hint)
 
         self.registerField("project_name*", self.name_edit)
         self.registerField("object_name*", self.object_name_edit)
@@ -183,7 +191,7 @@ class ImportPage(QWizardPage):
             "Die Datei kann auch später über Datei → Excel importieren nachgeladen werden."
         )
         hint.setWordWrap(True)
-        hint.setStyleSheet("color: #555;")
+        hint.setObjectName("hintText")
         layout.addWidget(hint)
 
     def _browse(self) -> None:

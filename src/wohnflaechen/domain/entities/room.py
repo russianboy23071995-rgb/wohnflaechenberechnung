@@ -14,6 +14,7 @@ class Room:
     id: Optional[int] = None
     project_id: int = 0
     floor_id: Optional[int] = None
+    building_id: Optional[int] = None
     name: str = ""
     number: str = ""
     raw_area: float = 0.0

@@ -1,4 +1,4 @@
-"""Archicad WoFlV-Excel-Format (Wohnflächenberechnung_Roh.xlsx)."""
+"""Archicad WoFlV-Excel-Format (Wohnflächenberechnung_Roh.xlsx und Varianten)."""
 
 import re
 from dataclasses import dataclass
@@ -6,17 +6,18 @@ from dataclasses import dataclass
 import pandas as pd
 
 from wohnflaechen.infrastructure.data_import.import_models import ImportedRoom
+from wohnflaechen.infrastructure.data_import.room_prefix import (
+    detect_room_prefix,
+    is_archicad_room_label,
+)
 
-# Spalten (0-basiert): A=Bezeichnung, B=Name/Rechenweg, F=Ergebnisse
+# Spalten (0-basiert): A=Bezeichnung, B=Name/Rechenweg, C=Flächenvorschau, F=Ergebnisse
 COL_LABEL = 0
 COL_TEXT = 1
 COL_AREA_PREVIEW = 2
 COL_RESULT = 5
 
-# Zeilen 1–10 (1-basiert) = Indizes 0–9 werden übersprungen; ab Zeile 11 scannen
-DATA_START_ROW = 10
-
-ROOM_PATTERN = re.compile(r"^R-\d+", re.IGNORECASE)
+NUMERIC_ROOM_PATTERN = re.compile(r"^\d{1,4}$")
 CALC_LINE_PATTERN = re.compile(r"^\d+:$")
 END_MARKERS = ("Summe Wohnfläche", "Summe Nutzfläche", "Wohnungen in dem")
 
@@ -43,6 +44,11 @@ def _cell_str(df: pd.DataFrame, row: int, col: int) -> str:
     if text in ("nan", "None"):
         return ""
     return text
+
+
+def is_room_label(label: str) -> bool:
+    """Raumkennung: Archicad R-/E-XXX oder numerische Nr."""
+    return is_archicad_room_label(label)
 
 
 def _parse_german_float(value) -> float:
@@ -97,6 +103,27 @@ def _is_end_marker(label: str) -> bool:
     return any(marker in label for marker in END_MARKERS)
 
 
+def _is_woflv_header_row(df: pd.DataFrame, row: int) -> bool:
+    header_nr = _cell_str(df, row, COL_LABEL).lower().replace(".", "")
+    header_name = _cell_str(df, row, COL_TEXT).lower()
+    return header_nr in ("nr", "nr.") and "raumbeschreibung" in header_name
+
+
+def _find_woflv_data_start(df: pd.DataFrame) -> int | None:
+    """Findet die erste Datenzeile nach Kopf „Nr. / Raumbeschreibung“."""
+    for row in range(min(40, len(df))):
+        if not _is_woflv_header_row(df, row):
+            continue
+        for candidate in (row + 2, row + 1):
+            if candidate >= len(df):
+                continue
+            label = _cell_str(df, candidate, COL_LABEL)
+            name = _cell_str(df, candidate, COL_TEXT)
+            if is_room_label(label) and name:
+                return candidate
+    return None
+
+
 def _parse_room_block(df: pd.DataFrame, start_row: int) -> tuple[_RoomBlock, int]:
     number = _cell_str(df, start_row, COL_LABEL)
     name = _cell_str(df, start_row, COL_TEXT)
@@ -109,7 +136,7 @@ def _parse_room_block(df: pd.DataFrame, start_row: int) -> tuple[_RoomBlock, int
     while row < len(df):
         label = _cell_str(df, row, COL_LABEL)
 
-        if ROOM_PATTERN.match(label):
+        if is_room_label(label):
             break
         if label and _is_end_marker(label):
             break
@@ -157,22 +184,36 @@ def _parse_room_block(df: pd.DataFrame, start_row: int) -> tuple[_RoomBlock, int
 
 
 def is_archicad_woflv_format(df: pd.DataFrame) -> bool:
-    """Erkennt das Roh-Exportformat mit R-XXX in Spalte A ab Zeile 11."""
-    for row in range(DATA_START_ROW, min(len(df), DATA_START_ROW + 200)):
+    """Erkennt WoFlV-Rohdaten (R-/E-XXX oder numerische Nr. mit Raumbeschreibung)."""
+    data_start = _find_woflv_data_start(df)
+    if data_start is not None:
+        return True
+
+    scan_from = data_start if data_start is not None else 0
+    for row in range(scan_from, min(len(df), scan_from + 300)):
         label = _cell_str(df, row, COL_LABEL)
-        if ROOM_PATTERN.match(label):
+        if detect_room_prefix(label):
+            return True
+        if NUMERIC_ROOM_PATTERN.match(label) and _cell_str(df, row, COL_TEXT):
             return True
     return False
 
 
 def parse_archicad_woflv(df: pd.DataFrame) -> list[ImportedRoom]:
-    """Parst Archicad-Wohnflächen-Rohdaten."""
+    """Parst Archicad-Wohnflächen-Rohdaten (alle bekannten Varianten)."""
     imported: list[ImportedRoom] = []
-    row = DATA_START_ROW
+    row = _find_woflv_data_start(df)
+    if row is None:
+        row = 0
 
     while row < len(df):
         label = _cell_str(df, row, COL_LABEL)
-        if not ROOM_PATTERN.match(label):
+        if not is_room_label(label):
+            row += 1
+            continue
+
+        name = _cell_str(df, row, COL_TEXT)
+        if not name:
             row += 1
             continue
 
